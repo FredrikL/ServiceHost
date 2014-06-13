@@ -9,7 +9,13 @@ namespace Example
         {
             try
             {
-                new Host().Start();
+                var host = new Host();
+
+                host.Container.Register<DummyOne, IInstance>();
+                host.Container.Register<DummyTwo, IInstance>();
+                //host.Container.Register<NullLogger, ILogger>();
+                
+                host.Start();
             }
             catch (Exception e)
             {
@@ -17,6 +23,24 @@ namespace Example
                 throw;
             }
             Console.ReadLine();
+        }
+
+        public class NullLogger : ILogger
+        {
+            public void Info(string msg)
+            {
+                
+            }
+
+            public void Debug(string msg)
+            {
+                
+            }
+
+            public void Error(string msg)
+            {
+                
+            }
         }
     }
 }

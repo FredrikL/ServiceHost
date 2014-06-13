@@ -33,6 +33,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>..\packages\Autofac.3.4.1\lib\net40\Autofac.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -42,15 +45,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActivatorConfigureInstanceResolver.cs" />
-    <Compile Include="AutoDiscoveryConfigureInstanceFinder.cs" />
     <Compile Include="Host.cs" />
-    <Compile Include="IConfigureInstance.cs" />
-    <Compile Include="IConfigureInstanceFinder.cs" />
-    <Compile Include="IConfigureInstanceResolver.cs" />
     <Compile Include="IInstance.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

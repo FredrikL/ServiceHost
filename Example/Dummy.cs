@@ -4,56 +4,52 @@ using ServiceHost;
 
 namespace Example
 {
-    public class Dummy : IInstance
+    public abstract class Dummy : IInstance
     {
         Timer _timer;
-        private int _instanceNumber;
-        public Dummy(int instanceNumber)
+        protected abstract int InstanceNumber { get; }
+        
+        public Dummy(ILogger logger)
         {
-            _instanceNumber = instanceNumber;
+            Logger = logger;
             _timer = new Timer(1000) { AutoReset = true };
-            _timer.Elapsed += (sender, eventArgs) => Logger.Info(string.Format("It is {0}, Instance: {1}", DateTime.Now, _instanceNumber));
+            _timer.Elapsed += (sender, eventArgs) => Logger.Info(string.Format("It is {0}, Instance: {1}", DateTime.Now, InstanceNumber));
         }
 
         public ILogger Logger { get; set; }
 
         public void Start()
         {
-
             _timer.Start();
         }
-        public void Stop() { _timer.Stop(); }
-    }
 
-    public class ConfigureDummyOne : IConfigureInstance
-    {
-        private Dummy _dummy;
-
-        public ConfigureDummyOne()
+        public void Stop()
         {
-            _dummy = new Dummy(1);
-        }
-
-        public ILogger Logger { get; set; }
-        public IInstance GetInstance()
-        {
-            return _dummy; 
+            _timer.Stop();
         }
     }
 
-    public class ConfigureDummyTwo : IConfigureInstance
+    public class DummyOne : Dummy
     {
-        private Dummy _dummy;
-
-        public ConfigureDummyTwo()
+        public DummyOne(ILogger logger) : base(logger)
         {
-            _dummy = new Dummy(2);
         }
 
-        public ILogger Logger { get; set; }
-        public IInstance GetInstance()
+        protected override int InstanceNumber
         {
-            return _dummy;
+            get { return 1; }
+        }
+    }
+
+    public class DummyTwo : Dummy
+    {
+        public DummyTwo(ILogger logger) : base(logger)
+        {
+        }
+
+        protected override int InstanceNumber
+        {
+            get { return 2; }
         }
     }
 }

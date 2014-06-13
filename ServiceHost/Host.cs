@@ -1,30 +1,25 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Autofac;
+using Autofac.Core;
 
 namespace ServiceHost
 {
     public class Host
     {
-        private readonly IConfigureInstanceFinder _finder;
-        private readonly IConfigureInstanceResolver _resolver;
-
-        public Host(IConfigureInstanceFinder finder = null, IConfigureInstanceResolver resolver = null)
+        public IoC Container { get; set; }
+        
+        public Host(IoC container = null)
         {
-            _finder = finder ?? new AutoDiscoveryConfigureInstanceFinder();
-            _resolver = resolver ?? new ActivatorConfigureInstanceResolver();
+            Container = container ?? DefaultRegistrations.Get();
         }
 
         public void Start()
         {
-            var instanceConfigurationConcreteTypes = _finder.Get();
-            // TODO: Check that all types in instanceConfigurationConcreteTypes really is IConfigureInstance
-
-            var instanceConfigurations = instanceConfigurationConcreteTypes.Select(t => _resolver.Get(t)).ToArray();
-
-            var instances =
-                from config in instanceConfigurations
-                select GetConfiguredInstance(config);
+            var instances = Container.ResolveAll<IInstance>();
 
             Start(instances.ToArray());
         }
@@ -41,7 +36,7 @@ namespace ServiceHost
                     }
                     catch (Exception e)
                     {
-                        var logger = instance.Logger ?? DefaultLogger;
+                        var logger = instance.Logger ?? Container.Resolve<ILogger>();
                         logger.Error(e.ToString());
                         instance.Stop();
                     }
@@ -51,17 +46,59 @@ namespace ServiceHost
             new ManualResetEvent(false).WaitOne();
         }
 
-        private IInstance GetConfiguredInstance(IConfigureInstance configuration)
+        private static class DefaultRegistrations
         {
-            var instance = configuration.GetInstance();
-            instance.Logger = configuration.Logger ?? DefaultLogger;
-            return instance;
+            public static IoC Get()
+            {
+                var ioc = new AutofacContainer();
+                ioc.Register<ConsoleLogger, ILogger>();
+                return ioc;
+            }
+        }
+    }
+
+    public interface IoC
+    {
+        void Register<T, K>();
+        T Resolve<T>();
+        IEnumerable<T> ResolveAll<T>();
+    }
+
+    public class AutofacContainer : IoC
+    {
+        private readonly ContainerBuilder _builder;
+
+        private IContainer _container;
+        private IContainer Container
+        {
+            get
+            {
+                if (_container == null)
+                {
+                    _container = _builder.Build();
+                }
+                return _container;
+            }
         }
 
-        private ILogger _defaultLogger;
-        private ILogger DefaultLogger
+        public AutofacContainer()
         {
-            get { return _defaultLogger ?? (_defaultLogger = new ConsoleLogger()); }
+            _builder = new ContainerBuilder();
+        }
+
+        public void Register<T, K>()
+        {
+            _builder.RegisterType<T>().As<K>();
+        }
+
+        public T Resolve<T>()
+        {
+            return Container.Resolve<T>();
+        }
+
+        public IEnumerable<T> ResolveAll<T>()
+        {
+            return Container.Resolve<IEnumerable<T>>();
         }
     }
 }
