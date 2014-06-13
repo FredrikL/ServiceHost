@@ -1,0 +1,25 @@
+{
+  "name": "ServiceHost",
+  "knowabungaDisplayName": "ServiceHost",
+  "version": "0.0.0",
+  "description": "A Service Host",
+  "license" : "MIT",
+  "contributors": [{
+      "name": "Marcus Malmgren",
+      "email": "marcus.malmgren@tretton37.com"
+    }, {
+      "name": "Fredrik Leijon",
+      "email": "fredrik@tretton37.com"
+    }
+  ],
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/FredrikL/ServiceHost.git"
+  },
+  "homepage": "https://github.com/FredrikL/ServiceHost",
+  "keywords": ["servicehost", "ioc"],
+  "_knowabungaCategories": [
+    "background-job", 
+  ],
+  "knowabungaCategory": "background-job"
+}
