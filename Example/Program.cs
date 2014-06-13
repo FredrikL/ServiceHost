@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using Castle.MicroKernel.Registration;
+using Castle.Windsor;
 using log4net;
 using ServiceHost;
 
@@ -12,12 +15,15 @@ namespace Example
             {
                 log4net.Config.XmlConfigurator.Configure(); // Logger initialized later with LoggingFacility
 
-                var host = new Host();
+                var container = new WindsorContainer();
 
-                host.Container.Register<DummyOne, IInstance>();
-                host.Container.Register<DummyTwo, IInstance>();
-                host.Container.Register<Log4NetLogger, ILogger>();
-                
+                container.Register(Component.For<IInstance>().ImplementedBy<DummyOne>());
+                container.Register(Component.For<IInstance>().ImplementedBy<DummyTwo>());
+                container.Register(Component.For<ILogger>().ImplementedBy<Log4NetLogger>());
+
+                var ioc = new WindsorIoC(container);
+
+                var host = new Host(ioc);
                 host.Start();
             }
             catch (Exception e)
@@ -45,6 +51,31 @@ namespace Example
             public void Error(string msg)
             {
                 _logger.Error(msg);
+            }
+        }
+
+        public class WindsorIoC : IoC
+        {
+            private IWindsorContainer _realContainer;
+
+            public WindsorIoC(IWindsorContainer realContainer)
+            {
+                _realContainer = realContainer;
+            }
+
+            public void Register<T, K>()
+            {
+                _realContainer.Register(Component.For(typeof(T)).ImplementedBy(typeof(K)));
+            }
+
+            public T Resolve<T>()
+            {
+                return _realContainer.Resolve<T>();
+            }
+
+            public IEnumerable<T> ResolveAll<T>()
+            {
+                return _realContainer.ResolveAll<T>();
             }
         }
     }
