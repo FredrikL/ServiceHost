@@ -13,7 +13,18 @@ namespace Example
         {
             Logger = logger;
             _timer = new Timer(1000) { AutoReset = true };
-            _timer.Elapsed += (sender, eventArgs) => Logger.Info(string.Format("It is {0}, Instance: {1}", DateTime.Now, InstanceNumber));
+            _timer.Elapsed += (sender, eventArgs) =>
+            {
+                string msg = string.Format("It is {0}, Instance: {1}", DateTime.Now, InstanceNumber);
+                if (DateTime.Now.Second%2 == 0)
+                {
+                    Logger.Info(msg);
+                }
+                else
+                {
+                    Logger.Debug(msg);
+                }
+            };
         }
 
         public ILogger Logger { get; set; }
